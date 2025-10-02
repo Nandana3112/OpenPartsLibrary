@@ -85,8 +85,12 @@ def parts():
 
 @app. route('/suppliers')
 def suppliers():
+    selected_uuid = request.args.get('selected')
     suppliers = pl.session.query(Supplier).all()
-    return render_template('suppliers.html', suppliers = suppliers, len = len)
+    selected_supplier = None
+    if selected_uuid:
+        selected_supplier = pl.session.query(Supplier).filter_by(uuid = selected_uuid).first()
+    return render_template('suppliers.html', suppliers = suppliers, selected_supplier = selected_supplier, len = len)
 
 @app.route('/create-supplier', methods = ['GET', 'POST'])
 def create_supplier():
@@ -116,8 +120,8 @@ def update_supplier(uuid):
         form.populate_obj(supplier)
         pl.session.commit()
         flash('Supplier updated successfully!', 'success')  
-        return redirect(url_for('suppliers'))
-    return render_template('update-supplier.html', form = form, supplier = supplier)
+        return redirect(url_for('suppliers', selected=supplier.uuid))
+    return render_template('supplier.html', form=form, supplier=supplier)
 
 @app.route('/delete-supplier/<uuid>', methods = ['GET', 'POST'])
 def delete_supplier(uuid):
